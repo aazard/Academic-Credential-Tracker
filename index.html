@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academic Credential Tracker | FQHC HIPAA Solutions</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #c0392b;
+            --gray: #7f8c8d;
+            --tesu: #8e44ad;
+            --cli: #16a085;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a3a, #2c3e50);
+            color: var(--light);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .logo i {
+            font-size: 2.5rem;
+            color: #3498db;
+        }
+        
+        .logo-text {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #3498db, #2ecc71);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #bdc3c7;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 900px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: rgba(44, 62, 80, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(127, 140, 141, 0.3);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(127, 140, 141, 0.3);
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #3498db;
+        }
+        
+        .card-icon {
+            background: var(--secondary);
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        .progress-container {
+            margin-bottom: 25px;
+        }
+        
+        .degree-progress {
+            margin-bottom: 20px;
+        }
+        
+        .degree-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .degree-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .degree-title.cli {
+            color: var(--cli);
+        }
+        
+        .degree-title.tesu {
+            color: var(--tesu);
+        }
+        
+        .progress-bar {
+            height: 20px;
+            background: #34495e;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        .progress-fill.cli {
+            background: linear-gradient(to right, #1abc9c, #16a085);
+        }
+        
+        .progress-fill.tesu {
+            background: linear-gradient(to right, #9b59b6, #8e44ad);
+        }
+        
+        .progress-text {
+            font-size: 0.9rem;
+            color: #bdc3c7;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .requirements {
+            margin-top: 30px;
+        }
+        
+        .requirements h3 {
+            margin-bottom: 15px;
+            color: #3498db;
+        }
+        
+        .requirement-category {
+            margin-bottom: 20px;
+        }
+        
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(127, 140, 141, 0.3);
+            margin-bottom: 10px;
+        }
+        
+        .category-title {
+            font-weight: 600;
+            color: #ecf0f1;
+        }
+        
+        .credits {
+            color: #3498db;
+            font-weight: 600;
+        }
+        
+        .course-list {
+            list-style: none;
+        }
+        
+        .course-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: rgba(52, 73, 94, 0.5);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: all 0.3s;
+        }
+        
+        .course-item:hover {
+            background: rgba(52, 73, 94, 0.7);
+            transform: translateX(5px);
+        }
+        
+        .course-info {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .course-checkbox {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 2px solid #3498db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .course-checkbox.checked {
+            background: #3498db;
+        }
+        
+        .course-checkbox.checked i {
+            display: block;
+            color: white;
+            font-size: 0.8rem;
+        }
+        
+        .course-checkbox i {
+            display: none;
+        }
+        
+        .course-code {
+            font-weight: 600;
+            color: #ecf0f1;
+        }
+        
+        .course-name {
+            color: #bdc3c7;
+            font-size: 0.9rem;
+        }
+        
+        .course-credits {
+            color: #f1c40f;
+            font-weight: 600;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #ecf0f1;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            border: 1px solid #34495e;
+            background: rgba(52, 73, 94, 0.5);
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 14px 28px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+        
+        .btn-accent {
+            background: linear-gradient(to right, #e74c3c, #c0392b);
+        }
+        
+        .btn-success {
+            background: linear-gradient(to right, #2ecc71, #27ae60);
+        }
+        
+        .chart-container {
+            height: 300px;
+            margin-bottom: 25px;
+        }
+        
+        .stat-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .stat-card {
+            background: rgba(52, 73, 94, 0.5);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(127, 140, 141, 0.3);
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #3498db, #2ecc71);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            color: #bdc3c7;
+            font-size: 0.9rem;
+        }
+        
+        .document-section {
+            margin-top: 30px;
+        }
+        
+        .document-section h3 {
+            margin-bottom: 15px;
+            color: #3498db;
+        }
+        
+        .document-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .document-btn {
+            background: rgba(52, 73, 94, 0.7);
+            border: 1px solid rgba(127, 140, 141, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .document-btn:hover {
+            background: rgba(52, 73, 94, 0.9);
+            transform: translateY(-5px);
+        }
+        
+        .document-btn i {
+            font-size: 2rem;
+            color: #3498db;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 50px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: #bdc3c7;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 600px) {
+            .card {
+                padding: 20px;
+            }
+            
+            .stat-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .document-actions {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-graduation-cap"></i>
+                <div class="logo-text">ACADEMIC CREDENTIAL TRACKER</div>
+            </div>
+            <p class="subtitle">Track your progress across CLI Associate, TESU Bachelor, and CLI Master degrees. Optimize your path to credentials for USCIS evidence.</p>
+        </header>
+
+        <div class="stat-cards">
+            <div class="stat-card">
+                <div class="stat-label">Total Credits</div>
+                <div class="stat-value" id="totalCredits">97</div>
+                <div class="stat-label">Banked & Completed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">ACE Credits</div>
+                <div class="stat-value" id="aceCredits">87</div>
+                <div class="stat-label">Credly Banked</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">RA Credits</div>
+                <div class="stat-value" id="raCredits">14</div>
+                <div class="stat-label">Transferred</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Degrees</div>
+                <div class="stat-value" id="degrees">2/3</div>
+                <div class="stat-label">Completed</div>
+            </div>
+        </div>
+
+        <div class="dashboard">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Degree Progress</h2>
+                    <div class="card-icon">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                </div>
+                
+                <div class="progress-container">
+                    <div class="degree-progress">
+                        <div class="degree-header">
+                            <div class="degree-title cli">
+                                <i class="fas fa-church"></i>
+                                CLI Associate of Christian Ministry
+                            </div>
+                            <div class="credits">30/30 credits</div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill cli" style="width: 100%"></div>
+                        </div>
+                        <div class="progress-text">
+                            <span>Status: Completed (June 2025)</span>
+                            <span>100%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="degree-progress">
+                        <div class="degree-header">
+                            <div class="degree-title tesu">
+                                <i class="fas fa-shield-alt"></i>
+                                TESU BS Cybersecurity
+                            </div>
+                            <div class="credits">117/120 credits</div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill tesu" style="width: 97.5%"></div>
+                        </div>
+                        <div class="progress-text">
+                            <span>Status: In Progress (Capstone)</span>
+                            <span>97.5%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="degree-progress">
+                        <div class="degree-header">
+                            <div class="degree-title cli">
+                                <i class="fas fa-hands-praying"></i>
+                                CLI Master of Chaplaincy
+                            </div>
+                            <div class="credits">18/36 credits</div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill cli" style="width: 50%"></div>
+                        </div>
+                        <div class="progress-text">
+                            <span>Status: In Progress</span>
+                            <span>50%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="progressChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Credit Details</h2>
+                    <div class="card-icon">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="creditType">Credit Type</label>
+                    <select id="creditType">
+                        <option value="ace">ACE Credit (Credly)</option>
+                        <option value="ra">RA Credit (Transcript)</option>
+                        <option value="tesu">TESU Course</option>
+                        <option value="cli">CLI Course</option>
+                        <option value="pla">Prior Learning Assessment</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label for="creditSource">Source/Provider</label>
+                    <input type="text" id="creditSource" placeholder="e.g., Sophia Learning, Study.com, University of Helsinki">
+                </div>
+                
+                <div class="grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="input-group">
+                        <label for="courseCode">Course Code</label>
+                        <input type="text" id="courseCode" placeholder="e.g., CYB-201">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="credits">Credits</label>
+                        <input type="number" id="credits" placeholder="Number of credits">
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="courseName">Course/Assessment Name</label>
+                    <input type="text" id="courseName" placeholder="e.g., Introduction to Cybersecurity">
+                </div>
+                
+                <div class="input-group">
+                    <label for="dateCompleted">Date Completed</label>
+                    <input type="date" id="dateCompleted">
+                </div>
+                
+                <button id="addCreditBtn" class="btn btn-block"><i class="fas fa-plus"></i> Add Credit</button>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Degree Requirements</h2>
+                <div class="card-icon">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+            </div>
+            
+            <div class="requirements">
+                <h3>TESU BS Cybersecurity Requirements</h3>
+                
+                <div class="requirement-category">
+                    <div class="category-header">
+                        <div class="category-title">Core Courses (18 credits)</div>
+                        <div class="credits">18/18 completed</div>
+                    </div>
+                    <ul class="course-list">
+                        <li class="course-item">
+                            <div class="course-info">
+                                <div class="course-checkbox checked"><i class="fas fa-check"></i></div>
+                                <div>
+                                    <div class="course-code">CYB-201</div>
+                                    <div class="course-name">Cybersecurity Fundamentals</div>
+                                </div>
+                            </div>
+                            <div class="course-credits">3 cr</div>
+                        </li>
+                        <li class="course-item">
+                            <div class="course-info">
+                                <div class="course-checkbox checked"><i class="fas fa-check"></i></div>
+                                <div>
+                                    <div class="course-code">CYB-203</div>
+                                    <div class="course-name">Network Security</div>
+                                </div>
+                            </div>
+                            <div class="course-credits">3 cr</div>
+                        </li>
+                        <li class="course-item">
+                            <div class="course-info">
+                                <div class="course-checkbox checked"><i class="fas fa-check"></i></div>
+                                <div>
+                                    <div class="course-code">CYB-301</div>
+                                    <div class="course-name">Ethical Hacking</div>
+                                </div>
+                            </div>
+                            <div class="course-credits">3 cr</div>
+                        </li>
+                        <li class="course-item">
+                            <div class="course-info">
+                                <div class="course-checkbox"><i class="fas fa-check"></i></div>
+                                <div>
+                                    <div class="course-code">CYB-495</div>
+                                    <div class="course-name">Cybersecurity Capstone</div>
+                                </div>
+                            </div>
+                            <div class="course-credits">3 cr</div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="requirement-category">
+                    <div class="category-header">
+                        <div class="category-title">Prior Learning Assessment (15 credits)</div>
+                        <div class="credits">12/15 completed</div>
+                    </div>
+                    <ul class="course-list">
+                        <li class="course-item">
+                            <div class="course-info">
+                                <div class="course-checkbox checked"><i class="fas fa-check"></i></div>
+                                <div>
+                                    <div class="course-code">PLA-101</div>
+                                    <div class="course-name">Quantum Threat Modeling (SSRN Paper)</div>
+                                </div>
+                            </div>
+                            <div class="course-credits">6 cr</div>
+                        </li>
+                        <li class="course-item">
+                            <div class="course-info">
+                                <div class="course-checkbox checked"><i class="fas fa-check"></i></div>
+                                <div>
+                                    <div class="course-code">PLA-102</div>
+                                    <div class="course-name">HIPAA-Chaplaincy Integration</div>
+                                </div>
+                            </div>
+                            <div class="course-credits">6 cr</div>
+                        </li>
+                        <li class="course-item">
+                            <div class="course-info">
+                                <div class="course-checkbox"><i class="fas fa-check"></i></div>
+                                <div>
+                                    <div class="course-code">PLA-103</div>
+                                    <div class="course-name">FQHC Security Protocols</div>
+                                </div>
+                            </div>
+                            <div class="course-credits">3 cr</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Document Generator</h2>
+                <div class="card-icon">
+                    <i class="fas fa-file-pdf"></i>
+                </div>
+            </div>
+            
+            <div class="document-section">
+                <h3>Generate USCIS Evidence Documents</h3>
+                <p>Create professional documentation for your National Interest Waiver petition.</p>
+                
+                <div class="document-actions">
+                    <div class="document-btn" id="transcriptBtn">
+                        <i class="fas fa-file-alt"></i>
+                        <div>Transcript Summary</div>
+                        <small>PDF of all credits</small>
+                    </div>
+                    
+                    <div class="document-btn" id="progressBtn">
+                        <i class="fas fa-chart-line"></i>
+                        <div>Progress Report</div>
+                        <small>Degree completion status</small>
+                    </div>
+                    
+                    <div class="document-btn" id="affidavitBtn">
+                        <i class="fas fa-file-signature"></i>
+                        <div>PLA Affidavit</div>
+                        <small>Prior Learning claims</small>
+                    </div>
+                    
+                    <div class="document-btn" id="fullPortfolioBtn">
+                        <i class="fas fa-briefcase"></i>
+                        <div>Full Portfolio</div>
+                        <small>Complete USCIS package</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Academic Credential Tracker | FQHC HIPAA Solutions LLC</p>
+            <p>© 2025 National Interest Waiver Evidence System | Part of Your USCIS Strategy</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize progress chart
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            const progressChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['ACE Credits', 'RA Credits', 'CLI Assoc', 'TESU BS', 'CLI Master'],
+                    datasets: [{
+                        label: 'Credits Completed',
+                        data: [87, 14, 30, 117, 18],
+                        backgroundColor: [
+                            'rgba(52, 152, 219, 0.7)',
+                            'rgba(155, 89, 182, 0.7)',
+                            'rgba(22, 160, 133, 0.7)',
+                            'rgba(142, 68, 173, 0.7)',
+                            'rgba(22, 160, 133, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(52, 152, 219, 1)',
+                            'rgba(155, 89, 182, 1)',
+                            'rgba(22, 160, 133, 1)',
+                            'rgba(142, 68, 173, 1)',
+                            'rgba(22, 160, 133, 1)'
+                        ],
+                        borderWidth: 1
+                    }, {
+                        label: 'Credits Required',
+                        data: [87, 14, 30, 120, 36],
+                        backgroundColor: 'rgba(127, 140, 141, 0.2)',
+                        borderColor: 'rgba(127, 140, 141, 0.5)',
+                        borderWidth: 1,
+                        type: 'bar'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Credits'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Credential Progress Overview'
+                        }
+                    }
+                }
+            });
+            
+            // Course checkbox functionality
+            document.querySelectorAll('.course-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('click', function() {
+                    this.classList.toggle('checked');
+                    const icon = this.querySelector('i');
+                    if (this.classList.contains('checked')) {
+                        icon.style.display = 'block';
+                    } else {
+                        icon.style.display = 'none';
+                    }
+                    
+                    // Update progress
+                    updateProgress();
+                });
+            });
+            
+            function updateProgress() {
+                // Update TESU progress
+                const tesuProgress = document.querySelector('.degree-progress:nth-child(2) .progress-fill');
+                tesuProgress.style.width = '97.5%';
+                
+                // Update TESU credits text
+                document.querySelector('.degree-progress:nth-child(2) .credits').textContent = '117/120 credits';
+            }
+            
+            // Add credit button functionality
+            document.getElementById('addCreditBtn').addEventListener('click', function() {
+                const creditType = document.getElementById('creditType').value;
+                const source = document.getElementById('creditSource').value || "Unknown Provider";
+                const courseCode = document.getElementById('courseCode').value || "N/A";
+                const credits = document.getElementById('credits').value || "0";
+                const courseName = document.getElementById('courseName').value || "Unnamed Course";
+                
+                // Create notification
+                const notification = document.createElement('div');
+                notification.innerHTML = `
+                    <div style="position: fixed; top: 20px; right: 20px; background: #27ae60; color: white; padding: 15px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 1000; display: flex; align-items: center;">
+                        <i class="fas fa-check-circle" style="margin-right: 10px; font-size: 1.2rem;"></i>
+                        <div>Added ${credits} credits from ${source}!</div>
+                    </div>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                // Remove notification after 5 seconds
+                setTimeout(() => {
+                    notification.remove();
+                }, 5000);
+                
+                // Reset form
+                document.getElementById('creditSource').value = '';
+                document.getElementById('courseCode').value = '';
+                document.getElementById('credits').value = '';
+                document.getElementById('courseName').value = '';
+            });
+            
+            // Document generation functionality
+            document.getElementById('transcriptBtn').addEventListener('click', function() {
+                generateDocument('Transcript Summary');
+            });
+            
+            document.getElementById('progressBtn').addEventListener('click', function() {
+                generateDocument('Degree Progress Report');
+            });
+            
+            document.getElementById('affidavitBtn').addEventListener('click', function() {
+                generateDocument('PLA Affidavit');
+            });
+            
+            document.getElementById('fullPortfolioBtn').addEventListener('click', function() {
+                generateDocument('Full USCIS Portfolio');
+            });
+            
+            function generateDocument(type) {
+                const notification = document.createElement('div');
+                notification.innerHTML = `
+                    <div style="position: fixed; top: 20px; right: 20px; background: #3498db; color: white; padding: 15px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 1000; display: flex; align-items: center;">
+                        <i class="fas fa-file-download" style="margin-right: 10px; font-size: 1.2rem;"></i>
+                        <div>Generating ${type} PDF...</div>
+                    </div>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                // Simulate PDF generation
+                setTimeout(() => {
+                    notification.innerHTML = `
+                        <div style="position: fixed; top: 20px; right: 20px; background: #27ae60; color: white; padding: 15px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 1000; display: flex; align-items: center;">
+                            <i class="fas fa-check-circle" style="margin-right: 10px; font-size: 1.2rem;"></i>
+                            <div>${type} PDF ready for download!</div>
+                        </div>
+                    `;
+                    
+                    // Remove after 5 seconds
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 5000);
+                    
+                    // Actual PDF generation would go here
+                }, 2000);
+            }
+        });
+    </script>
+</body>
+</html>
